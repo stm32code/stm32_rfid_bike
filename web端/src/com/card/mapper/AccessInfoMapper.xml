@@ -1,0 +1,50 @@
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间，为了对sql语句进行隔离，方便管理，mapper开发dao方式，使用namespace有特殊作用  
+mapper代理开发时将namespace指定为mapper接口的全限定名  
+ -->
+<mapper namespace="com.card.mapper.AccessInfoMapper"> 
+<!--在mapper.xml文件中配置很多的sql语句，执行每个sql语句时，封装为MappedStatement对象 
+mapper.xml以statement为单位管理sql语句  
+ -->
+	<!-- 添加电动车进出记录 -->
+	<insert id="addAccessInfo" parameterType="accessInfo">
+		insert into t_accessInfo(carObj,rfid,userId,inTime,outTime,memo) values 
+		(#{carObj.productNo},#{rfid},#{userId.user_name},#{inTime},#{outTime},#{memo})
+	</insert>
+
+	<!-- 按照查询条件分页查询电动车进出记录 -->
+	<select id="queryAccessInfo" resultMap="accessInfoMap" >
+		select t_accessInfo.* from t_accessInfo,t_product,t_userInfo ${where} and t_accessInfo.carObj = t_product.productNo and t_accessInfo.userId = t_userInfo.user_name limit #{startIndex},#{pageSize}
+	</select>
+	<resultMap id="accessInfoMap" type="accessInfo">
+        <id property="accessId" column="accessId" />
+        <association property="carObj" column="carObj" select="com.card.mapper.ProductMapper.getProduct" />
+        <association property="userId" column="userId" select="com.card.mapper.UserInfoMapper.getUserInfo" />
+    </resultMap>
+
+    <!-- 按照查询条件查询所有电动车进出记录 -->
+	<select id="queryAccessInfoList" resultMap="accessInfoMap" >
+		select t_accessInfo.* from t_accessInfo,t_product,t_userInfo ${where} and t_accessInfo.carObj = t_product.productNo and t_accessInfo.userId = t_userInfo.user_name
+	</select>
+
+    <!-- 按照查询条件的电动车进出记录数 -->
+	<select id="queryAccessInfoCount" resultType="int">
+		select count(*) from t_accessInfo,t_product,t_userInfo ${where} and t_accessInfo.carObj = t_product.productNo and t_accessInfo.userId = t_userInfo.user_name
+	</select>
+
+	<!-- 根据主键查询某个电动车进出记录 -->
+	<select id="getAccessInfo" parameterType="int" resultMap="accessInfoMap">
+		select * from t_accessInfo where t_accessInfo.accessId = #{accessId}
+	</select>
+
+	<!-- 更新电动车进出记录 -->
+	<update id="updateAccessInfo" parameterType="accessInfo">
+		update t_accessInfo set carObj=#{carObj.productNo},rfid=#{rfid},userId=#{userId.user_name},inTime=#{inTime},outTime=#{outTime},memo=#{memo} where accessId = #{accessId}
+	</update>
+
+	<!-- 删除电动车进出记录 -->
+	<delete id="deleteAccessInfo" parameterType="int">
+		delete from t_accessInfo where accessId=#{accessId}
+	</delete>
+
+</mapper>

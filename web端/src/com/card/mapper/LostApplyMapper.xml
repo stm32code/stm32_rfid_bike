@@ -1,0 +1,50 @@
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间，为了对sql语句进行隔离，方便管理，mapper开发dao方式，使用namespace有特殊作用  
+mapper代理开发时将namespace指定为mapper接口的全限定名  
+ -->
+<mapper namespace="com.card.mapper.LostApplyMapper"> 
+<!--在mapper.xml文件中配置很多的sql语句，执行每个sql语句时，封装为MappedStatement对象 
+mapper.xml以statement为单位管理sql语句  
+ -->
+	<!-- 添加挂失申请记录 -->
+	<insert id="addLostApply" parameterType="lostApply">
+		insert into t_lostApply(proObj,lostUserObj,lostTime,reason,applyState,result) values 
+		(#{proObj.productNo},#{lostUserObj.user_name},#{lostTime},#{reason},#{applyState},#{result})
+	</insert>
+
+	<!-- 按照查询条件分页查询挂失申请记录 -->
+	<select id="queryLostApply" resultMap="lostApplyMap" >
+		select t_lostApply.* from t_lostApply,t_product,t_userInfo ${where} and t_lostApply.proObj = t_product.productNo and t_lostApply.lostUserObj = t_userInfo.user_name limit #{startIndex},#{pageSize}
+	</select>
+	<resultMap id="lostApplyMap" type="lostApply">
+        <id property="lostApplyId" column="lostApplyId" />
+        <association property="proObj" column="proObj" select="com.card.mapper.ProductMapper.getProduct" />
+        <association property="lostUserObj" column="lostUserObj" select="com.card.mapper.UserInfoMapper.getUserInfo" />
+    </resultMap>
+
+    <!-- 按照查询条件查询所有挂失申请记录 -->
+	<select id="queryLostApplyList" resultMap="lostApplyMap" >
+		select t_lostApply.* from t_lostApply,t_product,t_userInfo ${where} and t_lostApply.proObj = t_product.productNo and t_lostApply.lostUserObj = t_userInfo.user_name
+	</select>
+
+    <!-- 按照查询条件的挂失申请记录数 -->
+	<select id="queryLostApplyCount" resultType="int">
+		select count(*) from t_lostApply,t_product,t_userInfo ${where} and t_lostApply.proObj = t_product.productNo and t_lostApply.lostUserObj = t_userInfo.user_name
+	</select>
+
+	<!-- 根据主键查询某个挂失申请记录 -->
+	<select id="getLostApply" parameterType="int" resultMap="lostApplyMap">
+		select * from t_lostApply where t_lostApply.lostApplyId = #{lostApplyId}
+	</select>
+
+	<!-- 更新挂失申请记录 -->
+	<update id="updateLostApply" parameterType="lostApply">
+		update t_lostApply set proObj=#{proObj.productNo},lostUserObj=#{lostUserObj.user_name},lostTime=#{lostTime},reason=#{reason},applyState=#{applyState},result=#{result} where lostApplyId = #{lostApplyId}
+	</update>
+
+	<!-- 删除挂失申请记录 -->
+	<delete id="deleteLostApply" parameterType="int">
+		delete from t_lostApply where lostApplyId=#{lostApplyId}
+	</delete>
+
+</mapper>

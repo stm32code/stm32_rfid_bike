@@ -1,0 +1,50 @@
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间，为了对sql语句进行隔离，方便管理，mapper开发dao方式，使用namespace有特殊作用  
+mapper代理开发时将namespace指定为mapper接口的全限定名  
+ -->
+<mapper namespace="com.card.mapper.ReissueMapper"> 
+<!--在mapper.xml文件中配置很多的sql语句，执行每个sql语句时，封装为MappedStatement对象 
+mapper.xml以statement为单位管理sql语句  
+ -->
+	<!-- 添加补办申请记录 -->
+	<insert id="addReissue" parameterType="reissue">
+		insert into t_reissue(proObj,userObj,reissueTime,ememo,state,rfid) values 
+		(#{proObj.productNo},#{userObj.user_name},#{reissueTime},#{ememo},#{state},#{rfid})
+	</insert>
+
+	<!-- 按照查询条件分页查询补办申请记录 -->
+	<select id="queryReissue" resultMap="reissueMap" >
+		select t_reissue.* from t_reissue,t_product,t_userInfo ${where} and t_reissue.proObj = t_product.productNo and t_reissue.userObj = t_userInfo.user_name limit #{startIndex},#{pageSize}
+	</select>
+	<resultMap id="reissueMap" type="reissue">
+        <id property="reissueId" column="reissueId" />
+        <association property="proObj" column="proObj" select="com.card.mapper.ProductMapper.getProduct" />
+        <association property="userObj" column="userObj" select="com.card.mapper.UserInfoMapper.getUserInfo" />
+    </resultMap>
+
+    <!-- 按照查询条件查询所有补办申请记录 -->
+	<select id="queryReissueList" resultMap="reissueMap" >
+		select t_reissue.* from t_reissue,t_product,t_userInfo ${where} and t_reissue.proObj = t_product.productNo and t_reissue.userObj = t_userInfo.user_name
+	</select>
+
+    <!-- 按照查询条件的补办申请记录数 -->
+	<select id="queryReissueCount" resultType="int">
+		select count(*) from t_reissue,t_product,t_userInfo ${where} and t_reissue.proObj = t_product.productNo and t_reissue.userObj = t_userInfo.user_name
+	</select>
+
+	<!-- 根据主键查询某个补办申请记录 -->
+	<select id="getReissue" parameterType="int" resultMap="reissueMap">
+		select * from t_reissue where t_reissue.reissueId = #{reissueId}
+	</select>
+
+	<!-- 更新补办申请记录 -->
+	<update id="updateReissue" parameterType="reissue">
+		update t_reissue set proObj=#{proObj.productNo},userObj=#{userObj.user_name},reissueTime=#{reissueTime},ememo=#{ememo},state=#{state},rfid=#{rfid} where reissueId = #{reissueId}
+	</update>
+
+	<!-- 删除补办申请记录 -->
+	<delete id="deleteReissue" parameterType="int">
+		delete from t_reissue where reissueId=#{reissueId}
+	</delete>
+
+</mapper>

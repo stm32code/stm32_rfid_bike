@@ -1,0 +1,57 @@
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间，为了对sql语句进行隔离，方便管理，mapper开发dao方式，使用namespace有特殊作用  
+mapper代理开发时将namespace指定为mapper接口的全限定名  
+ -->
+<mapper namespace="com.card.mapper.ProductMapper"> 
+<!--在mapper.xml文件中配置很多的sql语句，执行每个sql语句时，封装为MappedStatement对象 
+mapper.xml以statement为单位管理sql语句  
+ -->
+	<!-- 添加电动车记录 -->
+	<insert id="addProduct" parameterType="product">
+		insert into t_product(productNo,productClassObj,productName,mainPhoto,price,productDesc,addTime,userObj,proState,rfid) values 
+		(#{productNo},#{productClassObj.classId},#{productName},#{mainPhoto},#{price},#{productDesc},#{addTime},#{userObj.user_name},#{proState},#{rfid})
+	</insert>
+
+	<!-- 按照查询条件分页查询电动车记录 -->
+	<select id="queryProduct" resultMap="productMap" >
+		select t_product.* from t_product,t_productClass,t_userInfo ${where} and t_product.productClassObj = t_productClass.classId and t_product.userObj = t_userInfo.user_name limit #{startIndex},#{pageSize}
+	</select>
+	<resultMap id="productMap" type="product">
+        <id property="productNo" column="productNo" />
+        <association property="productClassObj" column="productClassObj" select="com.card.mapper.ProductClassMapper.getProductClass" />
+        <association property="userObj" column="userObj" select="com.card.mapper.UserInfoMapper.getUserInfo" />
+    </resultMap>
+
+    <!-- 按照查询条件查询所有电动车记录 -->
+	<select id="queryProductList" resultMap="productMap" >
+		select t_product.* from t_product,t_productClass,t_userInfo ${where} and t_product.productClassObj = t_productClass.classId and t_product.userObj = t_userInfo.user_name
+	</select>
+
+    <!-- 按照查询条件的电动车记录数 -->
+	<select id="queryProductCount" resultType="int">
+		select count(*) from t_product,t_productClass,t_userInfo ${where} and t_product.productClassObj = t_productClass.classId and t_product.userObj = t_userInfo.user_name
+	</select>
+
+	<!-- 根据主键查询某个电动车记录 -->
+	<select id="getProduct" parameterType="string" resultMap="productMap">
+		select * from t_product where t_product.productNo = #{productNo}
+	</select>
+	
+	<!-- 根据rfid查询某个电动车记录 -->
+	<select id="getProductByRfid" parameterType="string" resultMap="productMap">
+		select * from t_product where t_product.rfid = #{rfid}
+	</select>
+	
+	
+
+	<!-- 更新电动车记录 -->
+	<update id="updateProduct" parameterType="product">
+		update t_product set productClassObj=#{productClassObj.classId},productName=#{productName},mainPhoto=#{mainPhoto},price=#{price},productDesc=#{productDesc},addTime=#{addTime},userObj=#{userObj.user_name},proState=#{proState},rfid=#{rfid} where productNo = #{productNo}
+	</update>
+
+	<!-- 删除电动车记录 -->
+	<delete id="deleteProduct" parameterType="string">
+		delete from t_product where productNo=#{productNo}
+	</delete>
+
+</mapper>

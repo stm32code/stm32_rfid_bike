@@ -1,0 +1,50 @@
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间，为了对sql语句进行隔离，方便管理，mapper开发dao方式，使用namespace有特殊作用  
+mapper代理开发时将namespace指定为mapper接口的全限定名  
+ -->
+<mapper namespace="com.card.mapper.JieDongMapper"> 
+<!--在mapper.xml文件中配置很多的sql语句，执行每个sql语句时，封装为MappedStatement对象 
+mapper.xml以statement为单位管理sql语句  
+ -->
+	<!-- 添加解冻申请记录 -->
+	<insert id="addJieDong" parameterType="jieDong">
+		insert into t_jieDong(proObj,userObj,jiedongTime,reason,state,result) values 
+		(#{proObj.productNo},#{userObj.user_name},#{jiedongTime},#{reason},#{state},#{result})
+	</insert>
+
+	<!-- 按照查询条件分页查询解冻申请记录 -->
+	<select id="queryJieDong" resultMap="jieDongMap" >
+		select t_jieDong.* from t_jieDong,t_product,t_userInfo ${where} and t_jieDong.proObj = t_product.productNo and t_jieDong.userObj = t_userInfo.user_name limit #{startIndex},#{pageSize}
+	</select>
+	<resultMap id="jieDongMap" type="jieDong">
+        <id property="jieDongId" column="jieDongId" />
+        <association property="proObj" column="proObj" select="com.card.mapper.ProductMapper.getProduct" />
+        <association property="userObj" column="userObj" select="com.card.mapper.UserInfoMapper.getUserInfo" />
+    </resultMap>
+
+    <!-- 按照查询条件查询所有解冻申请记录 -->
+	<select id="queryJieDongList" resultMap="jieDongMap" >
+		select t_jieDong.* from t_jieDong,t_product,t_userInfo ${where} and t_jieDong.proObj = t_product.productNo and t_jieDong.userObj = t_userInfo.user_name
+	</select>
+
+    <!-- 按照查询条件的解冻申请记录数 -->
+	<select id="queryJieDongCount" resultType="int">
+		select count(*) from t_jieDong,t_product,t_userInfo ${where} and t_jieDong.proObj = t_product.productNo and t_jieDong.userObj = t_userInfo.user_name
+	</select>
+
+	<!-- 根据主键查询某个解冻申请记录 -->
+	<select id="getJieDong" parameterType="int" resultMap="jieDongMap">
+		select * from t_jieDong where t_jieDong.jieDongId = #{jieDongId}
+	</select>
+
+	<!-- 更新解冻申请记录 -->
+	<update id="updateJieDong" parameterType="jieDong">
+		update t_jieDong set proObj=#{proObj.productNo},userObj=#{userObj.user_name},jiedongTime=#{jiedongTime},reason=#{reason},state=#{state},result=#{result} where jieDongId = #{jieDongId}
+	</update>
+
+	<!-- 删除解冻申请记录 -->
+	<delete id="deleteJieDong" parameterType="int">
+		delete from t_jieDong where jieDongId=#{jieDongId}
+	</delete>
+
+</mapper>
